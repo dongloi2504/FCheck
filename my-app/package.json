@@ -1,5 +1,5 @@
 {
-  "homepage": "http://dongloi2504.github.io/FCheck",
+  "homepage": "https://dongloi2504.github.io/FCheck",
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
@@ -12,6 +12,7 @@
     "mammoth": "^1.8.0",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.4",
+    "react-circular-progressbar": "^2.1.0",
     "react-dom": "^18.3.1",
     "react-highlight-words": "^0.20.0",
     "react-router-dom": "^6.25.1",

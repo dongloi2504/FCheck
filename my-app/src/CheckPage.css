@@ -2,3 +2,16 @@
   max-width: 600px; /* Set the fixed width */
   white-space: normal; /* Allow wrapping of text */
 }
+.menu-icon {
+  width: 50px;
+  height: 50px;
+}
+.logo-text{
+  color: blueviolet;
+  font-size: 1.5rem; /* Kích thước chữ */
+  font-weight: bold; /* Nếu bạn muốn chữ đậm hơn */
+}
+.suggestion-text {
+  font-size: 24px; /* Tăng kích thước chữ, có thể điều chỉnh theo ý muốn */
+  font-weight: bold; /* Tùy chọn: Làm cho chữ đậm hơn */
+}
