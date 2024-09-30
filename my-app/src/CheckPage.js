@@ -1,33 +1,24 @@
 import React, { useRef, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Tooltip } from 'react-tooltip'; // Import Tooltip from react-tooltip
-import Test from './services/ProgramService'; // Import your service
+import { Tooltip } from 'react-tooltip';
+import Test from './services/ProgramService';
 import './CheckPage.css';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import mammoth from 'mammoth';
 
-const MenuIcon = () => <img src={process.env.PUBLIC_URL + "/logo1.png"} alt="menu-icon" className="menu-icon"/>
+const MenuIcon = () => <img src={process.env.PUBLIC_URL + "/logo1.png"} alt="menu-icon" className="menu-icon" />;
 const LogoIcon = () => <img src="https://openui.fly.dev/openui/24x24.svg?text=🖋️" alt="logo-icon" />;
-
 const Button = ({ children, className, onClick }) => (
   <button className={className} onClick={onClick}>{children}</button>
-);
-
-const AlertItem = ({ title, suggestion, description }) => (
-  <div className="bg-white p-2 rounded-lg shadow-sm mb-4" style={{ display: 'inline-block', width: 'fit-content' }}>
-    <h3 className="text-danger fw-semibold mb-1">{title}</h3>
-    <p className="mb-1">
-      <span className="text-danger">{suggestion}</span>
-    </p>
-    <p className="text-muted mb-0">{description}</p>
-  </div>
 );
 
 const CheckPage = () => {
   const [fileContent, setFileContent] = useState('');
   const [highlightedContent, setHighlightedContent] = useState('');
   const [overallScore, setOverallScore] = useState(null);
-  const [loading, setLoading] = useState(false); // New loading state
+  const [loading, setLoading] = useState(false);
+  const [typedContent, setTypedContent] = useState('');  // State for typing area
   const fileInputRef = useRef(null);
 
   const handleButtonClick = () => {
@@ -39,39 +30,53 @@ const CheckPage = () => {
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const content = e.target.result;
-        setFileContent(content);
-        setLoading(true); // Set loading state to true before API call
+      const fileExtension = file.name.split('.').pop().toLowerCase();
+      setLoading(true);
 
+      if (fileExtension === 'txt') {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const content = e.target.result;
+          setFileContent(content);
+          await processPlagiarism(content);
+        };
+        reader.readAsText(file);
+      } else if (fileExtension === 'docx') {
         try {
-          // Call the API
-          const result = await Test.checkPlagiarism(content);
-          console.log('API result:', result);
-          const roundedPercentage = Math.round(result.similarity_percentage);
-          setOverallScore(roundedPercentage);
-          const highlighted = highlightPlagiarizedSentences(content, result.plagiarized_sentences);
-          setHighlightedContent(highlighted);
+          const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+          const content = result.value;
+          setFileContent(content);
+          await processPlagiarism(content);
         } catch (error) {
-          console.error('Error in API call:', error);
-        } finally {
-          setLoading(false); // Reset loading state after API call
+          console.error('Error reading .docx file:', error);
         }
-      };
-      reader.readAsText(file);
+      } else {
+        console.error('Unsupported file type');
+      }
     }
   };
 
-  const escapeRegExp = (string) => {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const processPlagiarism = async (content) => {
+    try {
+      const result = await Test.checkPlagiarism(content);
+      console.log('API result:', result);
+      const roundedPercentage = Math.round(result.similarity_percentage);
+      setOverallScore(roundedPercentage);
+      const highlighted = highlightPlagiarizedSentences(content, result.plagiarized_sentences);
+      setHighlightedContent(highlighted);
+    } catch (error) {
+      console.error('Error in API call:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
   const highlightPlagiarizedSentences = (content, plagiarizedSentences) => {
     let highlighted = content;
 
     plagiarizedSentences.forEach(sentence => {
-      // Escape special characters in the input sentence
       const regex = new RegExp(`(${escapeRegExp(sentence.input_sentence)})`, 'gi');
       highlighted = highlighted.replace(regex, `<span class="text-danger" data-tooltip-id="tooltip" data-tooltip-content="${sentence.article_sentence}">$1</span>`);
     });
@@ -81,12 +86,30 @@ const CheckPage = () => {
 
   const uniquePercentage = overallScore !== null ? 100 - overallScore : null;
 
+  // Handle typing input
+  const handleTypingChange = (e) => {
+    setTypedContent(e.target.value);
+  };
+
+  // Handle plagiarism check for typed content
+  const handleTypingSubmit = async () => {
+    if (typedContent.trim() === '') {
+      console.error('Typed content is empty');
+      return;
+    }
+
+    setLoading(true);
+    await processPlagiarism(typedContent);
+  };
+
   return (
-    <div className="d-flex h-100 min-vh-100">
-      <div className="w-25 bg-light p-4 border-end d-flex flex-column">
+    <div className="d-flex flex-column flex-lg-row h-100 min-vh-100">
+      {/* Left Sidebar */}
+      <div className="w-25 bg-light p-4 border-end d-flex flex-column sidebar">
         <div className="d-flex align-items-center justify-content-between mb-4">
-          <div class="logo-container">
-            <MenuIcon/>
+          <div className="logo-container">
+            <MenuIcon />
+            
             <span className="logo-text">Let Us Check</span>
           </div>
           <LogoIcon />
@@ -96,7 +119,7 @@ const CheckPage = () => {
           <div className="mb-3">
             <input
               type="file"
-              accept=".txt,.doc"
+              accept=".txt,.doc,.docx"
               className="form-control d-none"
               ref={fileInputRef}
               onChange={handleFileChange}
@@ -118,7 +141,7 @@ const CheckPage = () => {
             </div>
             <div className="d-flex justify-content-between align-items-center mb-2">
               <span>Unique percentage</span>
-              <div style={{ width: '60px', height: '60px', } }>
+              <div style={{ width: '60px', height: '60px' }}>
                 <CircularProgressbar
                   value={uniquePercentage || 0}
                   text={`${uniquePercentage !== null ? `${uniquePercentage}%` : 'N/A'}`}
@@ -127,7 +150,6 @@ const CheckPage = () => {
                     textColor: '#228B22',
                     trailColor: '#d6d6d6',
                     backgroundColor: '#ccffcc',
-                
                   })}
                 />
               </div>
@@ -138,44 +160,46 @@ const CheckPage = () => {
           </div>
         </div>
       </div>
-      <div className="flex-fill p-8 bg-light" style={{ maxWidth: '800px', overflow: 'auto' }}>
+
+      {/* Main Content */}
+      <div className="flex-fill w-75 p-8 bg-light main-container" style={{ overflow: 'auto' }}>
         <h1 className="display-4 fw-bold mb-4">The Result:</h1>
         {loading ? (
-          <p>Loading...</p> // Display loading message while API call is in progress
+          <p>Loading...</p>
         ) : (
-          <div
-            style={{ whiteSpace: 'pre-wrap' }}
-            dangerouslySetInnerHTML={{ __html: highlightedContent || fileContent }}
-          />
+          <div>
+            <div
+              style={{ whiteSpace: 'pre-wrap' }}
+              dangerouslySetInnerHTML={{ __html: highlightedContent || fileContent }}
+            />
+            <Tooltip id="tooltip" className="custom-tooltip" />
+            {/* Add the textarea for typing below the result */}
+            <div className="mt-4">
+              <h3 className="h5">Type Your Text Here:</h3>
+              <textarea
+                className="form-control"
+                rows="5"
+                value={typedContent}
+                onChange={handleTypingChange}
+                placeholder="Type your text..."
+              />
+              <Button className="btn btn-success mt-3" onClick={handleTypingSubmit}>
+                Enter your text
+              </Button>
+            </div>
+          </div>
         )}
-        <Tooltip id="tooltip" className="custom-tooltip" /> {/* Use Tooltip with custom class */}
       </div>
-      <div className="w-25 bg-light p-4 border-start d-flex flex-column">
-      {overallScore !== null && overallScore > 0 && overallScore < 15 && (
+
+      {/* Right Sidebar */}
+      <div className="w-25 bg-light p-4 border-start d-flex flex-column rightbar">
+        {overallScore !== null && overallScore > 0 && overallScore < 15 && (
           <div className="alert alert-warning">
-            <p class="suggestion-text">Gợi ý cho bạn</p>
+            <p className="suggestion-text">Gợi ý cho bạn</p>
             <p><strong>*Cẩn thận với các trích dẫn:</strong> Dù % đạo văn thấp, bạn vẫn nên chắc chắn rằng tất cả các trích dẫn, nguồn tài liệu đều được ghi chú chính xác. Điều này sẽ giúp tránh những hiểu nhầm về đạo văn.</p>
-            <p><strong>*Kiểm tra lại cấu trúc câu:</strong> Cố gắng diễn đạt lại ý tưởng của nguồn tài liệu theo cách riêng của bạn. Dù không vi phạm đạo văn, việc paraphrasing tốt sẽ giúp văn bản trở nên độc đáo hơn.</p>
+            <p><strong>*Kiểm tra lại cấu trúc câu:</strong> Cố gắng diễn đạt lại ý tưởng của nguồn tài liệu theo cách riêng của bạn. Dù không vi phạm đạo văn, việc paraphrase sẽ giúp làm nổi bật sự đóng góp của bạn trong bài viết.</p>
           </div>
         )}
-          {overallScore !== null && overallScore > 15 && overallScore < 25 && (
-          <div className="alert alert-warning">
-            <p class="suggestion-text">Gợi ý cho bạn</p>
-            <p><strong>*Diễn giải lại rõ ràng hơn:</strong> Hãy cố gắng diễn giải lại các đoạn văn bạn đã tham khảo bằng ngôn ngữ của riêng mình, thay vì sao chép nguyên văn.</p>
-            <p><strong>*Tăng cường nội dung cá nhân:</strong> Bổ sung thêm quan điểm, phân tích cá nhân hoặc các dẫn chứng thực tế của bạn để làm cho bài viết của bạn có nhiều nội dung gốc hơn.</p>
-          </div>
-        )}
-      {overallScore !== null && overallScore > 25 && overallScore < 101 && (
-          <div className="alert alert-warning">
-            <p class="suggestion-text">Gợi ý cho bạn</p>
-            <p><strong>*Xem lại toàn bộ bài viết:</strong> Đọc lại toàn bộ nội dung và xác định những đoạn bạn đã sao chép hoặc phụ thuộc quá nhiều vào các tài liệu tham khảo. Thay đổi hoàn toàn những đoạn này bằng cách diễn giải lại hoặc thay thế bằng ý tưởng của riêng bạn.</p>
-            <p><strong>*Phát triển ý tưởng gốc: </strong>Tập trung vào việc đưa ra quan điểm, phân tích và sáng tạo nội dung của riêng bạn. Điều này sẽ giúp giảm đáng kể % đạo văn và tăng chất lượng bài viết.</p>
-          </div>
-        )}
-      <div className="w-25 bg-light p-4 border-start d-flex flex-column">
-    
-       
-      </div>
       </div>
     </div>
   );
