@@ -205,11 +205,25 @@ const CheckPage = () => {
 
       {/* Right Sidebar */}
       <div className="w-25 bg-light p-4 border-start d-flex flex-column rightbar">
-        {overallScore !== null && overallScore > 0 && overallScore < 15 && (
+      {overallScore !== null && overallScore > 0 && overallScore < 15 && (
           <div className="alert alert-warning">
             <p className="suggestion-text">Gợi ý cho bạn</p>
             <p><strong>*Cẩn thận với các trích dẫn:</strong> Dù % đạo văn thấp, bạn vẫn nên chắc chắn rằng tất cả các trích dẫn, nguồn tài liệu đều được ghi chú chính xác. Điều này sẽ giúp tránh những hiểu nhầm về đạo văn.</p>
-            <p><strong>*Kiểm tra lại cấu trúc câu:</strong> Cố gắng diễn đạt lại ý tưởng của nguồn tài liệu theo cách riêng của bạn. Dù không vi phạm đạo văn, việc paraphrase sẽ giúp làm nổi bật sự đóng góp của bạn trong bài viết.</p>
+            <p><strong>*Kiểm tra lại cấu trúc câu:</strong> Cố gắng diễn đạt lại ý tưởng của nguồn tài liệu theo cách riêng của bạn. Dù không vi phạm đạo văn, việc paraphrasing tốt sẽ giúp văn bản trở nên độc đáo hơn.</p>
+          </div>
+        )}
+        {overallScore !== null && overallScore > 15 && overallScore < 25 && (
+          <div className="alert alert-warning">
+            <p className="suggestion-text">Gợi ý cho bạn</p>
+            <p><strong>*Diễn giải lại rõ ràng hơn:</strong> Hãy cố gắng diễn giải lại các đoạn văn bạn đã tham khảo bằng ngôn ngữ của riêng mình, thay vì sao chép nguyên văn.</p>
+            <p><strong>*Tăng cường nội dung cá nhân:</strong> Bổ sung thêm quan điểm, phân tích cá nhân hoặc các dẫn chứng thực tế của bạn để làm cho bài viết của bạn có nhiều nội dung gốc hơn.</p>
+          </div>
+        )}
+        {overallScore !== null && overallScore > 25 && overallScore < 101 && (
+          <div className="alert alert-warning">
+            <p className="suggestion-text">Gợi ý cho bạn</p>
+            <p><strong>*Xem lại toàn bộ bài viết:</strong> Đọc lại toàn bộ nội dung và xác định những đoạn bạn đã sao chép hoặc phụ thuộc quá nhiều vào các tài liệu tham khảo. Thay đổi hoàn toàn những đoạn này bằng cách diễn giải lại hoặc thay thế bằng ý tưởng của riêng bạn.</p>
+            <p><strong>*Phát triển ý tưởng gốc: </strong>Tập trung vào việc đưa ra quan điểm, phân tích và sáng tạo nội dung của riêng bạn. Điều này sẽ giúp giảm đáng kể % đạo văn và tăng chất lượng bài viết.</p>
           </div>
         )}
       </div>
