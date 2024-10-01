@@ -19,8 +19,10 @@
   font-size: 24px; /* Increase font size */
   font-weight: bold; /* Bold text */
 }
-
-
+.content{
+  margin-left: 1rem;
+  margin-right: 1rem; 
+}
 @media (max-width: 992px) {
   .sidebar {
     width: 100% !important; 

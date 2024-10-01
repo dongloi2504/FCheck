@@ -168,6 +168,7 @@ const CheckPage = () => {
 
       {/* Main Content */}
       <div className="flex-fill w-75 p-8 bg-light main-container" style={{ overflow: 'auto' }}>
+        <div className="content">
         <h1 className="display-4 fw-bold mb-4">The Result:</h1>
         {loading ? (
           <p>Loading...</p>
@@ -199,6 +200,7 @@ const CheckPage = () => {
             </div>
           </div>
         )}
+        </div>
       </div>
 
       {/* Right Sidebar */}
