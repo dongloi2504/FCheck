@@ -7,7 +7,7 @@ import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import mammoth from 'mammoth';
 
-const MenuIcon = () => <img src={process.env.PUBLIC_URL + "/logo1.png"} alt="menu-icon" className="menu-icon" />;
+const MenuIcon = () => <img src={process.env.PUBLIC_URL + "/logo3.png"} alt="menu-icon" className="menu-icon" />;
 const LogoIcon = () => <img src="https://openui.fly.dev/openui/24x24.svg?text=🖋️" alt="logo-icon" />;
 const Button = ({ children, className, onClick }) => (
   <button className={className} onClick={onClick}>{children}</button>
@@ -114,9 +114,7 @@ const CheckPage = () => {
         <div className="d-flex align-items-center justify-content-between mb-4">
           <div className="logo-container">
             <MenuIcon />
-            <div class="w-100 w-lg-25">
-              Nội dung
-            </div>
+            
             <span className="logo-text">Let Us Check</span>
           </div>
           <LogoIcon />
