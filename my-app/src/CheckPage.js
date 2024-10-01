@@ -7,7 +7,7 @@ import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import mammoth from 'mammoth';
 
-const MenuIcon = () => <img src={process.env.PUBLIC_URL + "/logo3.png"} alt="menu-icon" className="menu-icon" />;
+const MenuIcon = () => <img src={process.env.PUBLIC_URL + "/logo1.png"} alt="menu-icon" className="menu-icon" />;
 const LogoIcon = () => <img src="https://openui.fly.dev/openui/24x24.svg?text=🖋️" alt="logo-icon" />;
 const Button = ({ children, className, onClick }) => (
   <button className={className} onClick={onClick}>{children}</button>
@@ -102,6 +102,11 @@ const CheckPage = () => {
     await processPlagiarism(typedContent);
   };
 
+  // Handle clear typing area
+  const handleClearText = () => {
+    setTypedContent('');  // Clear the text area by setting typedContent to an empty string
+  };
+
   return (
     <div className="d-flex flex-column flex-lg-row h-100 min-vh-100">
       {/* Left Sidebar */}
@@ -109,7 +114,9 @@ const CheckPage = () => {
         <div className="d-flex align-items-center justify-content-between mb-4">
           <div className="logo-container">
             <MenuIcon />
-            
+            <div class="w-100 w-lg-25">
+              Nội dung
+            </div>
             <span className="logo-text">Let Us Check</span>
           </div>
           <LogoIcon />
@@ -183,9 +190,14 @@ const CheckPage = () => {
                 onChange={handleTypingChange}
                 placeholder="Type your text..."
               />
-              <Button className="btn btn-success mt-3" onClick={handleTypingSubmit}>
-                Enter your text
-              </Button>
+              <div className="d-flex justify-content-start mt-3">
+                <Button className="btn btn-success me-2" onClick={handleTypingSubmit}>
+                  Enter your text
+                </Button>
+                <Button className="btn btn-danger" onClick={handleClearText}>
+                  Delete all your text
+                </Button>
+              </div>
             </div>
           </div>
         )}
