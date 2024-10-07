@@ -41,7 +41,17 @@ const CheckPage = () => {
           await processPlagiarism(content);
         };
         reader.readAsText(file);
-      } else if (fileExtension === 'docx') {
+      }
+      if (fileExtension === 'doc') {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const content = e.target.result;
+          setFileContent(content);
+          await processPlagiarism(content);
+        };
+        reader.readAsText(file);
+      }
+       else if (fileExtension === 'docx') {
         try {
           const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
           const content = result.value;
@@ -57,19 +67,20 @@ const CheckPage = () => {
   };
 
   const processPlagiarism = async (content) => {
-    try {
-      const result = await Test.checkPlagiarism(content);
-      console.log('API result:', result);
-      const roundedPercentage = Math.round(result.similarity_percentage);
-      setOverallScore(roundedPercentage);
-      const highlighted = highlightPlagiarizedSentences(content, result.plagiarized_sentences);
-      setHighlightedContent(highlighted);
-    } catch (error) {
-      console.error('Error in API call:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const result = await Test.checkPlagiarism(content);
+    console.log('API result:', result);
+    const roundedPercentage = Math.round(result.similarity_percentage);
+    setOverallScore(roundedPercentage);
+    const highlighted = highlightPlagiarizedSentences(content, result.plagiarized_sentences);
+    setHighlightedContent(highlighted);
+  } catch (error) {
+    console.error('Error in API call:', error);
+    alert('Hệ thống server đang bảo trì, xin các bạn thông cảm và thử lại sau.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
